@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { ToastContainer, toast } from "react-toastify";
 import { FaEnvelope, FaPhoneAlt, FaEye, FaEyeSlash } from "react-icons/fa";
+import { signupUser } from "../services/api"; // Import signupUser API
 import "react-toastify/dist/ReactToastify.css";
 import "tailwindcss/tailwind.css";
-import { WebToolKit } from "./WebToolKit";
-import { useNavigate } from "react-router-dom";
 
 // Validation Schema using Yup
 const schema = yup.object({
@@ -24,38 +23,45 @@ const schema = yup.object({
 }).required();
 
 const SignupForm = () => {
-  const navigate = useNavigate();
-  const [selectedField, setSelectedField] = useState("email"); // Default to email
-  const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Toggle confirm password visibility
+  const [selectedField, setSelectedField] = useState("email");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    control,
   } = useForm({
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data) => {
-    toast.success("Signup Successful!");
-    console.log(data);
+  const onSubmit = async (data) => {
+    const payload = {
+      name: data.name,
+      email: selectedField === "email" ? data.identifier : "",
+      phone: selectedField === "phone" ? data.identifier : "",
+      password: data.password,
+    };
 
-    // Redirect to Login page after successful signup
-    navigate("/login");
+    try {
+      const response = await signupUser(payload);
+      toast.success("Signup Successful!");
+      console.log(response);
+
+      // Optionally, you can store the token or redirect the user
+      localStorage.setItem("authToken", response.token);
+      // navigate("/login"); // Uncomment if using react-router for navigation
+
+    } catch (error) {
+      toast.error(error || "Signup failed");
+      console.error("Error during signup:", error);
+    }
   };
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
       {/* Gradient Background */}
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white to-pink-100"></div>
-
-      {/* 3D Background Effect with Three.js */}
-      <WebToolKit />
-
-      {/* Blurred Overlay */}
-      <div className="absolute top-0 left-0 w-full h-full bg-blur backdrop-blur-md"></div>
 
       <div className="absolute z-10 flex justify-center items-center w-full h-full">
         <div className="bg-white bg-opacity-30 backdrop-blur-lg p-8 rounded-lg shadow-2xl w-full sm:w-[400px] border-[2px] border-gray-300 transform transition-transform duration-700 hover:scale-105">
@@ -92,21 +98,15 @@ const SignupForm = () => {
             </div>
 
             {/* Dynamic Identifier Input */}
-            <Controller
-              name="identifier"
-              control={control}
-              render={({ field }) => (
-                <div className="mt-4">
-                  <input
-                    {...field}
-                    type="text"
-                    className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400"
-                    placeholder={`Enter your ${selectedField}`}
-                  />
-                  <p className="text-red-500 text-sm mt-1">{errors.identifier?.message}</p>
-                </div>
-              )}
-            />
+            <div className="mt-4">
+              <input
+                {...register("identifier")}
+                type="text"
+                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400"
+                placeholder={`Enter your ${selectedField}`}
+              />
+              <p className="text-red-500 text-sm mt-1">{errors.identifier?.message}</p>
+            </div>
 
             {/* Password */}
             <div>
