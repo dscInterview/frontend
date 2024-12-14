@@ -3,28 +3,26 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { ToastContainer, toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 import { FaEnvelope, FaPhoneAlt, FaEye, FaEyeSlash } from "react-icons/fa";
-import axios from "../services/api";
+import { loginUser } from "../services/api"; // Import the loginUser function
+import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import "tailwindcss/tailwind.css";
 
-// Validation Schema for Login
-const schema = yup
-  .object({
-    identifier: yup.string().required("Please provide an email or phone"),
-    password: yup
-      .string()
-      .required("Password is required")
-      .min(6, "Password must be at least 6 characters"),
-  })
-  .required();
+const schema = yup.object({
+  identifier: yup.string().required("Please provide an email or phone"),
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(6, "Password must be at least 6 characters"),
+}).required();
 
 const LoginForm = () => {
   const [selectedField, setSelectedField] = useState("email");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+
+  const navigate = useNavigate(); // Initialize the navigate function
 
   const {
     register,
@@ -36,22 +34,21 @@ const LoginForm = () => {
 
   const onSubmit = async (data) => {
     const payload = {
-      email: selectedField === "email" ? data.identifier : "",
-      phone: selectedField === "phone" ? data.identifier : "",
+      identifier: selectedField === "email" ? data.identifier : data.identifier, // This works for both email and phone
       password: data.password,
     };
 
     setIsLoading(true);
     try {
-      const response = await axios.post("/auth/login", payload);
+      const response = await loginUser(payload); // Call the loginUser function here
       toast.success("Login Successful!");
 
-      console.log(response.data); // Handle response (e.g., save token)
+      console.log(response.data);
 
-      // Add a delay before redirecting
+      // Redirect to the home page (or any page you want) after successful login
       setTimeout(() => {
-        navigate("/");
-      }, 2000); // Redirect after 2 seconds
+        navigate("/home"); // Update this path to your desired route
+      }, 2000); // Wait 2 seconds before redirecting to allow the user to see the success message
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed. Please try again.");
       console.error("Error during login:", error);
@@ -61,59 +58,53 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
-      {/* Gradient Background */}
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white to-pink-100"></div>
+    <div className="relative w-full h-screen overflow-hidden" style={{ backgroundColor: "var(--bg-color)" }}>
+      <div className="absolute top-0 left-0 w-full h-full bg-[#0d0d0d]"></div>
 
       <div className="absolute z-10 flex justify-center items-center w-full h-full">
-        <div className="bg-white bg-opacity-30 backdrop-blur-lg p-8 rounded-lg shadow-2xl w-full sm:w-[400px] border-[2px] border-gray-300 transform transition-transform duration-700 hover:scale-105">
+        <div className="bg-white bg-opacity-20 backdrop-blur-lg p-8 rounded-lg shadow-2xl w-full sm:w-[400px] border-[2px] border-gray-300 transform transition-transform duration-700 hover:scale-105" style={{ backgroundColor: "var(--object-bg)" }}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <h2 className="text-2xl font-semibold text-center text-gray-700">Login</h2>
+            <h2 className="text-2xl font-semibold text-center" style={{ color: "var(--text-color)" }}>Login</h2>
 
-            {/* Email or Phone Selector */}
             <div className="flex justify-center items-center space-x-4 mb-4">
               <button
                 type="button"
                 aria-label="Select Email Login"
-                className={`p-4 rounded-full ${
-                  selectedField === "email" ? "bg-blue-500 text-white" : "bg-gray-300"
-                }`}
+                className={`p-4 rounded-full ${selectedField === "email" ? "bg-gray-600 text-white" : "border-2 border-gray-300 bg-transparent text-gray-200"} hover:bg-gray-600 hover:text-white transition-all duration-300`}
                 onClick={() => setSelectedField("email")}
               >
-                <FaEnvelope />
+                <FaEnvelope className={`${selectedField === "email" ? "text-white" : "text-gray-200"}`} />
               </button>
               <button
                 type="button"
                 aria-label="Select Phone Login"
-                className={`p-4 rounded-full ${
-                  selectedField === "phone" ? "bg-blue-500 text-white" : "bg-gray-300"
-                }`}
+                className={`p-4 rounded-full ${selectedField === "phone" ? "bg-gray-600 text-white" : "border-2 border-gray-300 bg-transparent text-gray-200"} hover:bg-gray-600 hover:text-white transition-all duration-300`}
                 onClick={() => setSelectedField("phone")}
               >
-                <FaPhoneAlt />
+                <FaPhoneAlt className={`${selectedField === "phone" ? "text-white" : "text-gray-200"}`} />
               </button>
             </div>
 
-            {/* Identifier Input */}
-            <div>
+            <div className="mt-4">
               <input
                 {...register("identifier")}
                 type="text"
-                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400"
+                className="w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-gray-400"
                 placeholder={`Enter your ${selectedField}`}
+                style={{ backgroundColor: "var(--object-bg)", color: "var(--text-color)" }}
                 aria-label={`Enter your ${selectedField}`}
               />
               <p className="text-red-500 text-sm mt-1">{errors.identifier?.message}</p>
             </div>
 
-            {/* Password Input */}
             <div>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
-                  className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400"
+                  className="w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-gray-400"
                   placeholder="Password"
+                  style={{ backgroundColor: "var(--object-bg)", color: "var(--text-color)" }}
                   aria-label="Password"
                 />
                 <button
@@ -122,21 +113,16 @@ const LoginForm = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-3 cursor-pointer"
                 >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  {showPassword ? <FaEyeSlash className="text-gray-200" /> : <FaEye className="text-gray-200" />}
                 </button>
               </div>
               <p className="text-red-500 text-sm mt-1">{errors.password?.message}</p>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-3 rounded-lg mt-4 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                isLoading
-                  ? "bg-blue-300 text-white cursor-not-allowed"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
-              }`}
+              className={`w-full py-3 rounded-lg mt-4 border-2 border-gray-600 bg-transparent text-gray-200 hover:bg-gray-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-400 ${isLoading ? "cursor-not-allowed opacity-50" : ""}`}
             >
               {isLoading ? "Logging in..." : "Login"}
             </button>
@@ -144,7 +130,6 @@ const LoginForm = () => {
         </div>
       </div>
 
-      {/* Toast Notifications */}
       <ToastContainer />
     </div>
   );

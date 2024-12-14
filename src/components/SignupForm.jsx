@@ -4,11 +4,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { ToastContainer, toast } from "react-toastify";
 import { FaEnvelope, FaPhoneAlt, FaEye, FaEyeSlash } from "react-icons/fa";
-import { signupUser } from "../services/api"; // Import signupUser API
+import { signupUser } from "../services/api";
+import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import "tailwindcss/tailwind.css";
 
-// Validation Schema using Yup
 const schema = yup.object({
   name: yup.string().required("Name is required"),
   identifier: yup.string().required("Please provide an email or phone"),
@@ -21,6 +21,7 @@ const schema = yup.object({
     .oneOf([yup.ref("password"), null], "Passwords must match")
     .required("Confirm Password is required"),
 }).required();
+
 
 const SignupForm = () => {
   const [selectedField, setSelectedField] = useState("email");
@@ -35,6 +36,8 @@ const SignupForm = () => {
     resolver: yupResolver(schema),
   });
 
+  const navigate = useNavigate(); 
+
   const onSubmit = async (data) => {
     const payload = {
       name: data.name,
@@ -46,109 +49,112 @@ const SignupForm = () => {
     try {
       const response = await signupUser(payload);
       toast.success("Signup Successful!");
-      console.log(response);
 
-      // Optionally, you can store the token or redirect the user
-      localStorage.setItem("authToken", response.token);
-      // navigate("/login"); // Uncomment if using react-router for navigation
-
+      
+      setTimeout(() => {
+        navigate("/login");  
+      }, 2000);  
     } catch (error) {
-      toast.error(error || "Signup failed");
+      toast.error(error?.response?.data?.message || "Signup failed!");  
       console.error("Error during signup:", error);
     }
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
-      {/* Gradient Background */}
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white to-pink-100"></div>
+    <div className="relative w-full h-screen overflow-hidden" style={{ backgroundColor: "var(--bg-color)" }}>
+      <div className="absolute top-0 left-0 w-full h-full bg-[#0d0d0d]"></div>
 
       <div className="absolute z-10 flex justify-center items-center w-full h-full">
-        <div className="bg-white bg-opacity-30 backdrop-blur-lg p-8 rounded-lg shadow-2xl w-full sm:w-[400px] border-[2px] border-gray-300 transform transition-transform duration-700 hover:scale-105">
+        <div className="bg-white bg-opacity-20 backdrop-blur-lg p-8 rounded-lg shadow-2xl w-full sm:w-[400px] border-[2px] border-gray-300 transform transition-transform duration-700 hover:scale-105" style={{ backgroundColor: "var(--object-bg)" }}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <h2 className="text-2xl font-semibold text-center text-gray-700">Create Account</h2>
+            <h2 className="text-2xl font-semibold text-center" style={{ color: "var(--text-color)" }}>Create Account</h2>
 
-            {/* Name Input */}
             <div>
               <input
                 type="text"
                 {...register("name")}
-                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400"
+                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gray-400"
                 placeholder="Full Name"
+                style={{ backgroundColor: "var(--object-bg)", color: "var(--text-color)" }}
               />
               <p className="text-red-500 text-sm mt-1">{errors.name?.message}</p>
             </div>
 
-            {/* Mail and Phone Icons Centered */}
             <div className="flex justify-center items-center space-x-4 mb-4">
               <button
                 type="button"
-                className={`p-4 rounded-full ${selectedField === "email" ? "bg-blue-500 text-white" : "bg-gray-300"}`}
+                aria-label="Select Email Login"
+                className={`p-4 rounded-full ${selectedField === "email" ? "bg-gray-600 text-white" : "border-2 border-gray-300 bg-transparent text-gray-200"} hover:bg-gray-600 hover:text-white transition-all duration-300`}
                 onClick={() => setSelectedField("email")}
               >
-                <FaEnvelope />
+                <FaEnvelope className={`${selectedField === "email" ? "text-white" : "text-gray-200"}`} />
               </button>
               <button
                 type="button"
-                className={`p-4 rounded-full ${selectedField === "phone" ? "bg-blue-500 text-white" : "bg-gray-300"}`}
+                aria-label="Select Phone Login"
+                className={`p-4 rounded-full ${selectedField === "phone" ? "bg-gray-600 text-white" : "border-2 border-gray-300 bg-transparent text-gray-200"} hover:bg-gray-600 hover:text-white transition-all duration-300`}
                 onClick={() => setSelectedField("phone")}
               >
-                <FaPhoneAlt />
+                <FaPhoneAlt className={`${selectedField === "phone" ? "text-white" : "text-gray-200"}`} />
               </button>
             </div>
 
-            {/* Dynamic Identifier Input */}
             <div className="mt-4">
               <input
                 {...register("identifier")}
                 type="text"
-                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400"
+                className="w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-gray-400"
                 placeholder={`Enter your ${selectedField}`}
+                style={{ backgroundColor: "var(--object-bg)", color: "var(--text-color)" }}
               />
               <p className="text-red-500 text-sm mt-1">{errors.identifier?.message}</p>
             </div>
 
-            {/* Password */}
             <div>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
-                  className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400"
+                  className="w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-gray-400"
                   placeholder="Password"
+                  style={{ backgroundColor: "var(--object-bg)", color: "var(--text-color)" }}
                 />
-                <span
+                <button
+                  type="button"
+                  aria-label={showPassword ? "Hide Password" : "Show Password"}
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-3 cursor-pointer"
                 >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </span>
+                  {showPassword ? <FaEyeSlash className="text-gray-200" /> : <FaEye className="text-gray-200" />}
+                </button>
               </div>
               <p className="text-red-500 text-sm mt-1">{errors.password?.message}</p>
             </div>
 
-            {/* Confirm Password */}
             <div>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   {...register("confirmPassword")}
-                  className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400"
+                  className="w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-gray-400"
                   placeholder="Confirm Password"
+                  style={{ backgroundColor: "var(--object-bg)", color: "var(--text-color)" }}
                 />
-                <span
+                <button
+                  type="button"
+                  aria-label={showConfirmPassword ? "Hide Confirm Password" : "Show Confirm Password"}
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-3 cursor-pointer"
                 >
-                  {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                </span>
+                  {showConfirmPassword ? <FaEyeSlash className="text-gray-200" /> : <FaEye className="text-gray-200" />}
+                </button>
               </div>
               <p className="text-red-500 text-sm mt-1">{errors.confirmPassword?.message}</p>
             </div>
 
             <button
               type="submit"
-              className="w-full py-3 bg-blue-500 text-white rounded-lg mt-4 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full py-3 bg-transparent text-gray-200 border-2 border-gray-600 hover:bg-gray-600 hover:text-white rounded-lg mt-4 focus:outline-none focus:ring-2 focus:ring-gray-400"
             >
               Sign Up
             </button>
@@ -156,7 +162,6 @@ const SignupForm = () => {
         </div>
       </div>
 
-      {/* Toast Notifications */}
       <ToastContainer />
     </div>
   );

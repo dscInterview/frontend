@@ -1,3 +1,18 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
+:root {
+    --bg-color: #0d0d0d; 
+    --object-bg: #191919; 
+    --text-color: #ffffff; 
+  }
+  
+
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+  
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
+  
