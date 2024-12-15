@@ -45,7 +45,7 @@ const LoginForm = ({ setIsLogged }) => {
       setIsLogged(true); // Update the isLogged state to true
 
       setTimeout(() => {
-        navigate("/home");
+        navigate("/");
       }, 2000);
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed. Please try again.");

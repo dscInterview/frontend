@@ -1,35 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 const Navbar = ({ isLogged, setIsLogged }) => {
-  const [activeLink, setActiveLink] = useState('home');
-  const [loginFocus, setLoginFocus] = useState(false);
-
   const navigate = useNavigate();
+  const location = useLocation(); // Get current location
 
-  useEffect(() => {
-    if (loginFocus) {
-      const timeout = setTimeout(() => {
-        setLoginFocus(false);
-      }, 3000);
-      return () => clearTimeout(timeout);
-    }
-  }, [loginFocus]);
-
-  const handleLinkClick = (link) => {
-    setActiveLink(link);
-    if (link === 'home') navigate('/');
-    else if (link === 'about') navigate('/about-us');
-    else if (link === 'contact') navigate('/contact-us');
+  // Determine active link based on the current path
+  const getActiveLink = () => {
+    if (location.pathname === '/') return 'home';
+    if (location.pathname === '/about-us') return 'about';
+    if (location.pathname === '/contact-us') return 'contact';
+    return '';
   };
 
   const handleLoginClick = () => {
-    setActiveLink('');
     navigate('/login');
   };
 
   const handleSignupClick = () => {
-    setActiveLink('');
     navigate('/sign-up');
   };
 
@@ -42,6 +30,8 @@ const Navbar = ({ isLogged, setIsLogged }) => {
     navigate('/dashboard');
   };
 
+  const activeLink = getActiveLink();
+
   return (
     <nav className="flex items-center justify-between px-6 py-4">
       <div className="text-2xl font-bold">
@@ -51,7 +41,6 @@ const Navbar = ({ isLogged, setIsLogged }) => {
         {['home', 'about', 'contact'].map((link) => (
           <div
             key={link}
-            onClick={() => handleLinkClick(link)}
             className={`relative cursor-pointer ${activeLink === link ? 'text-white scale-110' : 'text-white'}`}
           >
             <Link
@@ -75,7 +64,7 @@ const Navbar = ({ isLogged, setIsLogged }) => {
           <>
             <button
               onClick={handleDashboardClick}
-              className={`px-6 py-2 border-2 border-transparent text-white rounded-md focus:outline-none transition-all duration-300 hover:border-green-500 hover:shadow-md hover:shadow-green-500/50`}
+              className={`px-6 py-2 border-2 border-transparent text-white rounded-md focus:outline-none transition-all duration-300 hover:border-purple-500 hover:shadow-md hover:shadow-purple-500/50`}
             >
               Dashboard
             </button>
@@ -90,10 +79,7 @@ const Navbar = ({ isLogged, setIsLogged }) => {
           <>
             <button
               onClick={handleLoginClick}
-              className={`px-6 py-2 border-2 border-transparent text-white rounded-md focus:outline-none transition-all duration-300 ${loginFocus
-                ? 'border-green-500 shadow-lg shadow-green-500/50'
-                : 'hover:border-green-500 hover:shadow-md hover:shadow-green-500/50'
-              }`}
+              className={`px-6 py-2 border-2 border-transparent text-white rounded-md focus:outline-none transition-all duration-300 hover:border-green-500 hover:shadow-md hover:shadow-green-500/50`}
             >
               Login
             </button>
