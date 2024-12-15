@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ToastContainer, toast } from "react-toastify";
+import {  toast } from "react-toastify";
 import { FaEnvelope, FaPhoneAlt, FaEye, FaEyeSlash } from "react-icons/fa";
 import { signupUser } from "../services/api";
 import { useNavigate } from "react-router-dom";
@@ -48,6 +48,8 @@ const SignupForm = () => {
 
     try {
       const response = await signupUser(payload);
+      const result = await response.json();
+      console.log(result);
       toast.success("Signup Successful!");
 
       
@@ -162,7 +164,6 @@ const SignupForm = () => {
         </div>
       </div>
 
-      <ToastContainer />
     </div>
   );
 };
