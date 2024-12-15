@@ -2,10 +2,13 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ToastContainer, toast } from "react-toastify";
+import {  toast } from "react-toastify";
 import { FaEnvelope, FaPhoneAlt, FaEye, FaEyeSlash } from "react-icons/fa";
 import { loginUser } from "../services/api";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from 'react-redux';
+import { login } from '../redux/slices/authSlice';
+
 
 const schema = yup.object({
   identifier: yup.string().required("Please provide an email or phone"),
@@ -15,7 +18,8 @@ const schema = yup.object({
     .min(6, "Password must be at least 6 characters"),
 }).required();
 
-const LoginForm = ({ setIsLogged }) => {
+const LoginForm = () => {
+  const dispatch = useDispatch();
   const [selectedField, setSelectedField] = useState("email");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,12 +45,8 @@ const LoginForm = ({ setIsLogged }) => {
       const response = await loginUser(payload);
       toast.success("Login Successful!");
       console.log(response.data);
-
-      setIsLogged(true); // Update the isLogged state to true
-
-      setTimeout(() => {
+      dispatch(login());
         navigate("/");
-      }, 2000);
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed. Please try again.");
       console.error("Error during login:", error);
@@ -117,7 +117,6 @@ const LoginForm = ({ setIsLogged }) => {
           </form>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 };
