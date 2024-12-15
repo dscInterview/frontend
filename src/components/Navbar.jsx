@@ -1,10 +1,13 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../redux/slices/authSlice';
+import { toast } from 'react-toastify'; 
 const Navbar = ({ isLogged, setIsLogged }) => {
   const navigate = useNavigate();
   const location = useLocation(); // Get current location
-
+  const dispatch = useDispatch();
+  const { isLoggedIn } = useSelector((state) => state.auth);
   // Determine active link based on the current path
   const getActiveLink = () => {
     if (location.pathname === '/') return 'home';
@@ -22,7 +25,8 @@ const Navbar = ({ isLogged, setIsLogged }) => {
   };
 
   const handleLogoutClick = () => {
-    setIsLogged(false);
+    toast.error('Logged out Successfully!');
+    dispatch(logout());
     navigate('/');
   };
 
@@ -60,7 +64,7 @@ const Navbar = ({ isLogged, setIsLogged }) => {
       </div>
 
       <div className="flex space-x-4">
-        {isLogged ? (
+        {isLoggedIn ? (
           <>
             <button
               onClick={handleDashboardClick}
