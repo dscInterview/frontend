@@ -10,9 +10,12 @@ const api = axios.create({
 
 export const signupUser = async (userData) => {
   try {
+    console.log("in try block of api.js")
+    console.log(userData)
     const response = await api.post("/auth/signup", userData);
     return response.data;
   } catch (error) {
+    console.log("in catch block of api.js")
     throw error.response ? error.response.data : error.message;
   }
 };

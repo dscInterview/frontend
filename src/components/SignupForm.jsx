@@ -47,9 +47,9 @@ const SignupForm = () => {
     };
 
     try {
+      console.log("Yo Bro")
       const response = await signupUser(payload);
-      const result = await response.json();
-      console.log(result);
+      console.log("Im in try block");
       toast.success("Signup Successful!");
 
       
@@ -57,6 +57,7 @@ const SignupForm = () => {
         navigate("/login");  
       }, 2000);  
     } catch (error) {
+      console.log("Im in catch block")
       toast.error(error?.response?.data?.message || "Signup failed!");  
       console.error("Error during signup:", error);
     }
