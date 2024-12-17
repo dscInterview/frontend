@@ -1,104 +1,102 @@
-import React, { useState } from 'react';
-import { FiArrowRight } from 'react-icons/fi';
-import { useForm } from 'react-hook-form';
-import * as Yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
+import React, { useState } from "react";
+import { FaSearch, FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa"; // React Icons for stars
 
-// Form validation schema
-const schema = Yup.object().shape({
-  prompt: Yup.string()
-    .required('Prompt is required')
-    .max(300, 'Prompt cannot exceed 300 characters'),
-});
+const Homepage = () => {
+  const [searchClicked, setSearchClicked] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [data, setData] = useState(null);
 
-const HomePage = () => {
-  const [generatedImage, setGeneratedImage] = useState(null); // Store generated image
-  const [description, setDescription] = useState(''); // Store description
+  const handleSearchClick = () => {
+    if (searchQuery.trim() !== "") {
+      // Simulate fetching data based on the search query
+      setData({
+        image: "https://via.placeholder.com/300",
+        description:
+          "Samsung is genius because it's the opposite of Apple. Apple is not genius because we can't afford it, that's why we are not fit.",
+        ratings: 4.5, // Rating value between 0 and 5
+        price: "$299",
+        link: "https://www.google.com", // Dummy link for the Buy Now button
+      });
+      setSearchClicked(true);
+    }
+  };
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(schema),
-  });
-
-  const onSubmit = (data) => {
-    const mockImage = 'https://via.placeholder.com/400x300'; // Replace with backend image URL
-    const mockDescription = `Generated image for: "${data.prompt}"`;
-
-    setGeneratedImage(mockImage);
-    setDescription(mockDescription);
+  const renderStars = (rating) => {
+    // Rating can range from 0 to 5
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      if (rating >= i) {
+        stars.push(<FaStar key={i} className="text-yellow-500" />);
+      } else if (rating > i - 1 && rating < i) {
+        stars.push(<FaStarHalfAlt key={i} className="text-yellow-500" />);
+      } else {
+        stars.push(<FaRegStar key={i} className="text-yellow-500" />);
+      }
+    }
+    return stars;
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen space-y-8">
-      {/* Image Display Section */}
-      <div className="flex flex-col items-center w-full max-w-lg">
-        {generatedImage ? (
-          <>
-            <img
-              src={generatedImage}
-              alt="Generated"
-              className="w-full h-auto object-contain rounded-md border border-gray-300"
-            />
-            <p className="mt-4 text-center text-gray-700">{description}</p>
-          </>
-        ) : (
-          <div className="w-full h-64 flex items-center justify-center border border-dashed border-gray-400 rounded-md">
-            <p className="text-gray-500">No image generated yet</p>
-          </div>
-        )}
+    <div className="relative w-full min-h-auto bg-transparent text-white">
+      {/* Before Clicking: Search Bar and Button */}
+      <div className="flex justify-center items-center w-10/12 mx-auto h-24 mt-12">
+        <div className="flex items-center w-full max-w-3xl p-4 rounded-md">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="px-4 py-3 text-white bg-[#191919] w-full border-b-2 border-[#191919] focus:outline-none"
+          />
+          <button
+            onClick={handleSearchClick}
+            className="ml-4 px-6 py-2 border-2 border-transparent text-white rounded-md focus:outline-none transition-all duration-300 hover:border-white hover:shadow-md hover:shadow-white"
+          >
+            <FaSearch className="inline mr-2" />
+            Search
+          </button>
+        </div>
       </div>
 
-      {/* Input Section */}
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-lg flex items-center space-x-4"
-      >
-        <div className="relative w-full">
-          {/* Arrow Icon for focus, initially centered */}
-          <FiArrowRight
-            size={24}
-            className="absolute top-[-15px] left-1/2 transform -translate-x-1/2 cursor-pointer text-gray-600 hover:text-gray-800"
-            onClick={() => document.getElementById('promptInput').focus()}
-          />
-          
-          {/* Input field */}
-          <textarea
-            {...register('prompt')}
-            id="promptInput"
-            placeholder="Enter your prompt..."
-            rows={1}
-            onInput={(e) => {
-              e.target.style.height = 'auto';
-              const maxHeight = window.innerHeight * 0.2; // Limit to 20% of viewport height
-              e.target.style.height = `${Math.min(e.target.scrollHeight, maxHeight)}px`;
-              if (e.target.scrollHeight > maxHeight) {
-                e.target.style.overflowY = 'scroll';
-              }
-            }}
-            className={`w-full px-4 py-3 border ${
-              errors.prompt ? 'border-red-500' : 'border-gray-300'
-            } rounded-md text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none`}
-          />
+      {/* After Clicking: Show Details in Row Layout */}
+      {searchClicked && data && (
+        <div className="flex flex-col md:flex-row justify-center mx-auto p-6 mt-12 w-10/12">
+          {/* Image */}
+          <div className="w-full md:w-1/2 mb-6 md:mb-0">
+            <img
+              src={data?.image}
+              alt="Product"
+              className="w-full max-w-md mx-auto rounded-lg"
+            />
+          </div>
+
+          {/* Product Details (Description, Ratings, Price, and Buy Now Button) */}
+          <div className="flex flex-col md:w-1/2 justify-center md:items-start text-center md:text-left">
+            <h2 className="text-xl font-bold mb-4">{data?.description}</h2>
+
+            {/* Ratings with Stars and Rating Number */}
+            <div className="flex items-center mb-6"> {/* Increased margin-bottom for more space */}
+              {renderStars(data?.ratings)}
+              <span className="ml-2 text-yellow-500 text-lg font-semibold">{data?.ratings}</span>
+            </div>
+
+            {/* Price and Buy Now Button */}
+            <div className="flex justify-between items-center mb-8 space-x-8"> {/* Increased margin-bottom and space between price and button */}
+              <p className="text-lg font-bold">{data?.price}</p>
+              <a
+                href={data?.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`px-6 py-2 border-2 border-transparent text-white rounded-md focus:outline-none transition-all duration-300 hover:border-red-500 hover:shadow-md hover:shadow-red-500/50`}
+              >
+                Buy Now
+              </a>
+            </div>
+          </div>
         </div>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="p-3 bg-white border border-gray-300 rounded-full hover:shadow-lg focus:ring-2 focus:ring-gray-400 focus:outline-none"
-        >
-          <FiArrowRight className="text-black" size={24} />
-        </button>
-      </form>
-
-      {/* Error Message */}
-      {errors.prompt && (
-        <p className="text-red-500 text-sm mt-2">{errors.prompt.message}</p>
       )}
     </div>
   );
 };
 
-export default HomePage;
+export default Homepage;
