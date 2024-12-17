@@ -1,102 +1,85 @@
 import React, { useState } from 'react';
-import { FiArrowRight } from 'react-icons/fi';
 import { useForm } from 'react-hook-form';
-import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
-// Form validation schema
-const schema = Yup.object().shape({
-  prompt: Yup.string()
-    .required('Prompt is required')
-    .max(300, 'Prompt cannot exceed 300 characters'),
-});
+// Yup validation schema
+const schema = yup.object({
+  prompt: yup.string().required('Prompt is required').min(5, 'Prompt should be at least 5 characters')
+}).required();
 
 const ContactPage = () => {
-  const [generatedImage, setGeneratedImage] = useState(null); // Store generated image
-  const [description, setDescription] = useState(''); // Store description
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
+  const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data) => {
-    const mockImage = 'https://via.placeholder.com/400x300'; // Replace with backend image URL
-    const mockDescription = `Generated image for: "${data.prompt}"`;
+  const [promptHeight, setPromptHeight] = useState('120px'); // Initial height to accommodate more text
 
-    setGeneratedImage(mockImage);
-    setDescription(mockDescription);
+  const onSubmit = (data) => {
+    console.log('Submitted Prompt:', data.prompt); // Log the prompt data to the console
+  };
+
+  // Handle the prompt field height increase when button is clicked
+  const handlePromptChange = () => {
+    setPromptHeight('400px'); // Increase height threshold for more sentences
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen space-y-8">
-      {/* Image Display Section */}
-      <div className="flex flex-col items-center w-full max-w-lg">
-        {generatedImage ? (
-          <>
-            <img
-              src={generatedImage}
-              alt="Generated"
-              className="w-full h-auto object-contain rounded-md border border-gray-300"
+    <div className="h-auto flex justify-center items-start bg-transparent"> {/* Adjusted height to 90vh */}
+      <div className="relative w-full sm:w-4/5 md:w-3/4 lg:w-2/3 px-6 py-6 mt-24"> {/* Increased width to sm:w-4/5 */}
+        {/* Centered Heading */}
+        <h2 className="text-2xl text-white mb-4 font-semibold text-center">What can I help with?</h2>
+        
+        {/* Form with submit */}
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-center space-y-4">
+          <div className="flex items-center space-x-4 w-full">
+            {/* Textarea Input Field */}
+            <textarea
+              id="prompt"
+              name="prompt"
+              placeholder="Enter your prompt..."
+              {...register('prompt')}
+              className={`w-full p-4 text-white bg-[#191919] rounded-md resize-none focus:outline-none transition-all duration-300 ${promptHeight} ${
+                errors.prompt ? 'border-red-500' : ''
+              }`}
+              style={{
+                minHeight: '120px', // Increased the minimum height to show more lines
+                maxHeight: '500px',
+                overflowY: 'auto',
+                transition: 'height 0.3s ease-in-out',
+              }}
             />
-            <p className="mt-4 text-center text-gray-700">{description}</p>
-          </>
-        ) : (
-          <div className="w-full h-64 flex items-center justify-center border border-dashed border-gray-400 rounded-md">
-            <p className="text-gray-500">No image generated yet</p>
+            
+            {/* Paper Plane Icon for Sending */}
+            <button
+              type="submit" // Changed to submit button
+              onClick={handlePromptChange} // Increase height on button click
+              className="p-4 border-2 border-transparent text-white rounded-full focus:outline-none transition-all duration-300 hover:border-green-500 hover:shadow-md hover:shadow-green-500/50"
+            >
+              {/* Paper Plane Icon SVG */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-white hover:text-green-500"
+              >
+                <path d="M21 2L12 13l-3-3-5 5 11 4L21 2z" />
+              </svg>
+            </button>
           </div>
-        )}
-      </div>
-
-      {/* Input Section */}
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-lg flex items-center space-x-4"
-      >
-        <div className="relative w-full">
-          {/* Arrow Icon for focus, initially centered */}
-          <FiArrowRight
-            size={24}
-            className="absolute top-[-15px] left-1/2 transform -translate-x-1/2 cursor-pointer text-gray-600 hover:text-gray-800"
-            onClick={() => document.getElementById('promptInput').focus()}
-          />
           
-          {/* Input field */}
-          <textarea
-            {...register('prompt')}
-            id="promptInput"
-            placeholder="Enter your prompt..."
-            rows={1}
-            onInput={(e) => {
-              e.target.style.height = 'auto';
-              const maxHeight = window.innerHeight * 0.2; // Limit to 20% of viewport height
-              e.target.style.height = `${Math.min(e.target.scrollHeight, maxHeight)}px`;
-              if (e.target.scrollHeight > maxHeight) {
-                e.target.style.overflowY = 'scroll';
-              }
-            }}
-            className={`w-full px-4 py-3 border ${
-              errors.prompt ? 'border-red-500' : 'border-gray-300'
-            } rounded-md text-gray-700 focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none`}
-          />
-        </div>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="p-3 bg-white border border-gray-300 rounded-full hover:shadow-lg focus:ring-2 focus:ring-gray-400 focus:outline-none"
-        >
-          <FiArrowRight className="text-black" size={24} />
-        </button>
-      </form>
-
-      {/* Error Message */}
-      {errors.prompt && (
-        <p className="text-red-500 text-sm mt-2">{errors.prompt.message}</p>
-      )}
+          {/* Error message */}
+          {errors.prompt && (
+            <p className="text-red-500 text-sm mt-2">{errors.prompt.message}</p>
+          )}
+        </form>
+      </div>
     </div>
   );
 };
